@@ -1,6 +1,7 @@
 import { FactoryProvider, Inject } from '@nestjs/common';
 import { drizzle, NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from './schema';
+import { Config, ConfigProviderKey } from '../config/config.provider';
 
 export type DB = NodePgDatabase<typeof schema>;
 
@@ -10,14 +11,15 @@ export const InjectDB = () => Inject(DrizzleProvider);
 
 export const drizzleProvider: FactoryProvider<DB> = {
   provide: DrizzleProvider,
-  useFactory: () =>
+  inject: [ConfigProviderKey],
+  useFactory: (config: Config) =>
     drizzle({
       connection: {
-        host: 'localhost',
-        port: 5432,
-        database: 'todos_db',
-        user: 'dev',
-        password: 'dev',
+        host: config.database.host,
+        port: config.database.port,
+        database: config.database.name,
+        user: config.database.user,
+        password: config.database.password,
         ssl: false,
       },
     }),
